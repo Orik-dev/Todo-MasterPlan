@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:todo/plan_provider.dart';
 import 'package:todo/views/plan_screen.dart';
 
-import '../models/plan.dart';
-
 class PlanCreatorScreen extends StatefulWidget {
   const PlanCreatorScreen({super.key});
 
@@ -16,11 +14,8 @@ class _PlanCreatorScreenState extends State<PlanCreatorScreen> {
 
   void addPlan() {
     final text = textController.text;
-    if (text.isEmpty) {
-      return;
-    }
-    final plan = Plan()..name = text;
-    PlanProvider.of(context)?.add(plan);
+    final controller = PlanProvider.of(context);
+    controller.addNewPlan(text);
     textController.clear();
     FocusScope.of(context).requestFocus(FocusNode());
     setState(() {});
@@ -63,8 +58,8 @@ class _PlanCreatorScreenState extends State<PlanCreatorScreen> {
   }
 
   Widget _buildMasterPlans() {
-    final plans = PlanProvider.of(context);
-    if (plans!.isEmpty) {
+    final plans = PlanProvider.of(context).plans;
+    if (plans.isEmpty) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
@@ -84,13 +79,25 @@ class _PlanCreatorScreenState extends State<PlanCreatorScreen> {
         itemCount: plans.length,
         itemBuilder: (context, index) {
           final plan = plans[index];
-          return ListTile(
-              title: Text((plan.name)),
-              subtitle: Text(plan.completenessMessage),
-              onTap: () {
-                Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => PlanScreen(plan: plan)));
-              });
+          return Dismissible(
+            key: ValueKey(plan),
+            background: Container(
+              color: Colors.red,
+            ),
+            direction: DismissDirection.endToStart,
+            onDismissed: (_) {
+              final controller = PlanProvider.of(context);
+              controller.deletePlan(plan);
+              setState(() {});
+            },
+            child: ListTile(
+                title: Text((plan.name)),
+                subtitle: Text(plan.completenessMessage),
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => PlanScreen(plan: plan)));
+                }),
+          );
         });
   }
 }
