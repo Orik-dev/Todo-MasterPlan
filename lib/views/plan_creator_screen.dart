@@ -91,7 +91,7 @@ class _PlanCreatorScreenState extends State<PlanCreatorScreen> {
               setState(() {});
             },
             child: ListTile(
-                title: Text((plan.name)),
+                title: Text((plan.name!)),
                 subtitle: Text(plan.completenessMessage),
                 onTap: () {
                   Navigator.of(context).push(MaterialPageRoute(
